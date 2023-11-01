@@ -1,0 +1,8 @@
+wordFreq*
+!*.hs
+
+wordLadder*
+!*.hs
+
+testfiles/
+.vscode/
