@@ -1,7 +1,8 @@
-import System.IO (openFile, IOMode (ReadMode))
+import System.IO (readFile)
 import System.Environment (getArgs, getProgName)
 import System.Exit (die)
-import GHC.IO.Handle (Handle)
+import Data.Map (fromListWith)
+import Data.Char (isSpace, isAlpha, toLower)
 {-
 
 Problem 1: Word Frequency Counter
@@ -106,10 +107,8 @@ main = do
       _ -> do 
             pn <- getProgName
             die $ "Usage: "++pn++" <filename>"
-   text <- openFile filename ReadMode
-   wordFreq text
+   text <- readFile filename
+   mapM_ (putStrLn . cleanLine) $ lines text
 
-
-wordFreq :: Handle -> IO ()
-wordFreq _ = putStrLn "hi"
-  
+cleanLine :: String -> String
+cleanLine line = filter (\x -> isAlpha x || isSpace x) (map toLower line)
