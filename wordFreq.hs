@@ -3,6 +3,9 @@ import System.Environment (getArgs, getProgName)
 import System.Exit (die)
 import Data.Map (fromListWith)
 import Data.Char (isSpace, isAlpha, toLower)
+import qualified Data.Map as Data
+import Data.List (sortBy)
+
 {-
 
 Problem 1: Word Frequency Counter
@@ -108,7 +111,13 @@ main = do
             pn <- getProgName
             die $ "Usage: "++pn++" <filename>"
    text <- readFile filename
-   mapM_ (putStrLn . cleanLine) $ lines text
+   mapM_ printTuple $ linesToFreqList text
 
+printTuple :: (String, Int) -> IO ()
+printTuple (s, i) = do
+   putStrLn $ show i ++ ' ':s
 cleanLine :: String -> String
 cleanLine line = filter (\x -> isAlpha x || isSpace x) (map toLower line)
+
+linesToFreqList :: String -> [(String, Int)]
+linesToFreqList xs = take 40 $ sortBy (\(_,x) (_,y) -> compare y x) $ Data.toList $ fromListWith (+) [(c,1) | c <- words (cleanLine xs)]
