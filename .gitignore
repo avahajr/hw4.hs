@@ -4,5 +4,4 @@ wordFreq*
 wordLadder*
 !*.hs
 
-testfiles/
 .vscode/
