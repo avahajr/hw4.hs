@@ -116,8 +116,9 @@ main = do
 printTuple :: (String, Int) -> IO ()
 printTuple (s, i) = do
    putStrLn $ show i ++ ' ':s
-cleanLine :: String -> String
-cleanLine line = filter (\x -> isAlpha x || isSpace x) (map toLower line)
+
+alphaOrWhitespace :: String -> String
+alphaOrWhitespace fileTxt = filter (\x -> isAlpha x || isSpace x) (map toLower fileTxt)
 
 linesToFreqList :: String -> [(String, Int)]
-linesToFreqList xs = take 40 $ sortBy (\(_,x) (_,y) -> compare y x) $ Data.toList $ fromListWith (+) [(c,1) | c <- words (cleanLine xs)]
+linesToFreqList xs = take 40 $ sortBy (\(_,x) (_,y) -> compare y x) $ Data.toList $ fromListWith (+) [(c,1) | c <- words (alphaOrWhitespace xs)]

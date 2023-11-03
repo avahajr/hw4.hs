@@ -1,3 +1,6 @@
+import System.Exit (die)
+import System.Directory.Internal.Prelude (getArgs)
+import System.Environment (getProgName)
 {-
 
 Problem 2: Word Ladder
@@ -71,6 +74,33 @@ to improve its performance, but is otherwise untuned.
 
 -}
 
+
 main :: IO ()
 main = do
-  putStrLn "Write your code here"
+  args <- getArgs
+  case args of
+    [filename, start, end] -> do
+      if length start /= length end
+      then die $ show start ++ " and " ++ show end ++ " must be the same length"
+      else 
+        do
+          text <- readFile filename
+          if start `notElem` words text
+          then die $ show start ++ " is not in dictionary"
+          else if end `notElem` words text
+          then die $ show end ++ " is not in dictionary"
+          else putStrLn "ready to function"
+    _ -> do
+      pn <- getProgName
+      die $ "Usage: " ++ pn ++ " <dictionary-filename> <from-word> <to-word>"
+      
+
+adj :: String -> String -> Bool
+"" `adj` "" = False
+(x:xs) `adj` (y:ys) 
+  | x == y = xs `adj` ys
+  | otherwise = xs == ys
+
+getAdjList :: String -> [String] -> [String]
+getAdjList s = filter (s `adj`) 
+
