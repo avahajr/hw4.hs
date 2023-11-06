@@ -4,9 +4,7 @@ import System.Environment (getProgName)
 import Data.Char (isLower)
 import Data.Set (Set)
 import qualified Data.Set as Set
--- import Control.Monad (foldM)
--- import Control.Monad.Cont (msum)
--- import Control.Monad (mzero)
+
 {-
 
 Problem 2: Word Ladder
@@ -89,10 +87,10 @@ main = do
     [filename, start, end] -> do
       if length start /= length end
       then die $ show start ++ " and " ++ show end ++ " must be the same length"
-      else 
+      else let sl = length start in 
         do
           text <- readFile filename
-          let dict = Set.fromList(filter (\w -> length w == length start && all isLower w) (words text)) in
+          let dict = Set.fromList(filter (\w -> length w == sl && all isLower w) (words text)) in
             if start `notElem` dict
             then die $ show start ++ " is not in dictionary"
             else if end `notElem` dict
@@ -112,8 +110,8 @@ _ `adj` "" = False
   | x == y = xs `adj` ys
   | otherwise = xs == ys
 
-getAdjList :: String -> Dict -> [String]
-getAdjList s dict = Set.toList $ Set.filter (`adj` s) dict
+getAdjSet :: String -> Dict -> Set String
+getAdjSet s = Set.filter (`adj` s) 
 
 findWordLadder :: Dict -> String -> String -> Maybe [String]
 findWordLadder dict start end = bfs [(start, [start])] Set.empty 0
@@ -123,8 +121,8 @@ findWordLadder dict start end = bfs [(start, [start])] Set.empty 0
     bfs ((word, path):rest) visited step
       | word == end = Just (reverse path)
       | step >= 20 = Nothing
-      | otherwise = let nextWords = getAdjList word dict 
-                        unvisitedNextWords = filter (`Set.notMember` visited) nextWords
-                        newPaths = [(w, w:path) | w <- unvisitedNextWords]
+      | otherwise = let nextWords = getAdjSet word dict 
+                        unvisitedNextWords = Set.difference nextWords visited
+                        newPaths = [(w, w:path) | w <- Set.toList unvisitedNextWords]
                         step' = if null rest then step + 1 else step
                     in bfs (rest ++ newPaths) (Set.insert word visited) step'
