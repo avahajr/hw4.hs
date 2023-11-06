@@ -5,3 +5,6 @@ wordLadder*
 !*.hs
 
 .vscode/
+*.zip
+.vscode/settings.json
+.vscode/tasks.json
