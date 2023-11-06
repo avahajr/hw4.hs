@@ -1,6 +1,12 @@
 import System.Exit (die)
 import System.Directory.Internal.Prelude (getArgs)
 import System.Environment (getProgName)
+import Data.Char (isLower)
+import Data.Set (Set)
+import qualified Data.Set as Set
+-- import Control.Monad (foldM)
+-- import Control.Monad.Cont (msum)
+-- import Control.Monad (mzero)
 {-
 
 Problem 2: Word Ladder
@@ -74,6 +80,7 @@ to improve its performance, but is otherwise untuned.
 
 -}
 
+type Dict = Set String
 
 main :: IO ()
 main = do
@@ -85,22 +92,39 @@ main = do
       else 
         do
           text <- readFile filename
-          if start `notElem` words text
-          then die $ show start ++ " is not in dictionary"
-          else if end `notElem` words text
-          then die $ show end ++ " is not in dictionary"
-          else putStrLn "ready to function"
+          let dict = Set.fromList(filter (\w -> length w == length start && all isLower w) (words text)) in
+            if start `notElem` dict
+            then die $ show start ++ " is not in dictionary"
+            else if end `notElem` dict
+            then die $ show end ++ " is not in dictionary"
+            else case findWordLadder dict start end of
+              Nothing -> putStrLn "Unable to find a ladder in 20"
+              Just optimalPath -> mapM_ putStrLn optimalPath
     _ -> do
       pn <- getProgName
       die $ "Usage: " ++ pn ++ " <dictionary-filename> <from-word> <to-word>"
-      
 
 adj :: String -> String -> Bool
 "" `adj` "" = False
+"" `adj` _ = False
+_ `adj` "" = False
 (x:xs) `adj` (y:ys) 
   | x == y = xs `adj` ys
   | otherwise = xs == ys
 
-getAdjList :: String -> [String] -> [String]
-getAdjList s = filter (s `adj`) 
+getAdjList :: String -> Dict -> [String]
+getAdjList s dict = Set.toList $ Set.filter (`adj` s) dict
 
+findWordLadder :: Dict -> String -> String -> Maybe [String]
+findWordLadder dict start end = bfs [(start, [start])] Set.empty 0
+  where
+    bfs :: [(String, [String])] -> Set String -> Int -> Maybe [String]
+    bfs [] _ _ = Nothing
+    bfs ((word, path):rest) visited step
+      | word == end = Just (reverse path)
+      | step >= 20 = Nothing
+      | otherwise = let nextWords = getAdjList word dict 
+                        unvisitedNextWords = filter (`Set.notMember` visited) nextWords
+                        newPaths = [(w, w:path) | w <- unvisitedNextWords]
+                        step' = if null rest then step + 1 else step
+                    in bfs (rest ++ newPaths) (Set.insert word visited) step'
